@@ -1,0 +1,10 @@
+{
+    "smtp": {
+        "host": "test@test.test",
+        "port": 999
+    },
+    "imap": {
+        "host": "test@test.test",
+        "port": 999
+    }
+}
