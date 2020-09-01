@@ -91,6 +91,14 @@ export class Worker {
         if (parsed.text)
             return parsed.text;
         else
-            return `Error: message body is undefined` //page: 218
+            return `Error: message body is undefined`;
+    }
+
+    public async deleteMessage(inCallOptions: ICallOptions): Promise<any> {
+        const client: any = await this.connectToServer();
+        await client.deleteMessages(
+            inCallOptions.mailbox, inCallOptions.id, {byUid: true}
+        );
+        await client.close();
     }
 }

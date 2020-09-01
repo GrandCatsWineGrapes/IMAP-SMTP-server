@@ -23,21 +23,21 @@ app.get('/mailboxes', async (inRequest: Request, inResponse: Response) => {
     try {
         const imapWorker: IMAP.Worker = new IMAP.Worker(serverInfo);
         const mailboxes: IMAP.IMailbox[] = await imapWorker.listMailboxes();
-        inResponse.json(mailboxes);
+        inResponse.status(200).json(mailboxes);
     } catch (inError) {
-        inResponse.send('error');
+        inResponse.send(inError);
     }
 })
 
 app.get('/mailboxes/:mailbox', async (inRequest: Request, inResponse: Response) => {
     try {
         const imapWorker: IMAP.Worker = new IMAP.Worker(serverInfo);
-        const messages: IMAP.Imessage[] = await imapWorker.listMessages({
+        const messages: IMAP.IMessage[] = await imapWorker.listMessages({
             mailbox : inRequest.params.mailbox
         });
-        inResponse.json(messages);
+        inResponse.json(messages).status(200);
     } catch (inError) {
-        inResponse.send('error');
+        inResponse.send(inError);
     }
 })
 
@@ -48,8 +48,9 @@ app.get('/messages/:mailbox/:id', async (inRequest: Request, inResponse: Respons
             mailbox: inRequest.params.mailbox,
             id: parseInt(inRequest.params.id, 10)
         })
+        inResponse.send(messageBody).status(200)
     } catch (inError) {
-        inResponse.send('error');
+        inResponse.send(inError);
     }
 })
 
@@ -62,7 +63,7 @@ app.delete('/messages/:mailbox/:id', async (inRequest: Request, inResponse: Resp
         })
         inResponse.send('ok')
     } catch (inError) {
-        inResponse.send('error')
+        inResponse.send(inError)
     }
 })
 
@@ -72,7 +73,7 @@ app.post('/messages', async (inRequest: Request, inResponse: Response) => {
         await smtpWorker.sendMessage(inRequest.body);
         inResponse.send('ok');
     } catch (inError) {
-        inResponse.send('error')
+        inResponse.status(200).send(inError)
     }
 })
 
@@ -82,7 +83,7 @@ app.get('/contacts', async (inRequest: Request, inResponse: Response) => {
         const contacts: IContact[] = await contactsWorker.listContacts();
         inResponse.json(contacts);
     } catch (inError) {
-        inResponse.send('error')
+        inResponse.send(inError)
     }
 })
 
@@ -90,9 +91,9 @@ app.post('/contacts', async (inRequest: Request, inResponse: Response) => {
     try {
         const contactsWorker: Contacts.Worker = new Contacts.Worker();
         const contact: IContact = await contactsWorker.addContact(inRequest.body);
-        inResponse.json(contact)
+        inResponse.status(201).json(contact)
     } catch (inError) {
-        inResponse.send('error')
+        inResponse.send(inError)
     }
 })
 
@@ -102,7 +103,18 @@ app.delete('/contacts/:id', async (inRequest: Request, inResponse: Response) => 
         await contactsWorker.deleteContact(inRequest.params.id);
         inResponse.send('ok');
     } catch (inError) {
-        inResponse.send('error')
+        inResponse.send(inError)
     }
 })
 
+app.put('/contacts/:id', async (req: Request, res: Response) => {
+    try {
+        const contactsWorker: Contacts.Worker = new Contacts.Worker();
+        await contactsWorker.updateContact(req.params.id, req.body)
+        res.status(201).send(`Contact with id: ${req.params.id} updated`)
+    } catch (err) {
+        res.send(err)
+    }
+})
+
+app.listen(3000, "localhost");

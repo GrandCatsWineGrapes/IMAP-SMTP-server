@@ -1,10 +1,18 @@
 {
     "smtp": {
-        "host": "test@test.test",
-        "port": 999
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "auth": {
+            "user": "joshua.k.fear@gmail.com",
+            "pass": "Horse_like_kfear"
+        }
     },
     "imap": {
-        "host": "test@test.test",
-        "port": 999
+        "host": "imap.gmail.com",
+        "port": 993,
+        "auth": {
+            "user": "joshua.k.fear@gmail.com",
+            "pass": "Horse_like_kfear"
+        }
     }
 }
