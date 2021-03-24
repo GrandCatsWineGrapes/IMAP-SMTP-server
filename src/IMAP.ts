@@ -25,11 +25,13 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 
 export class Worker {
+    /** Информация о сервере */
     private static serverInfo: IServerInfo;
-    constructor(inServerInfo: IServerInfo) {
-        Worker.serverInfo = inServerInfo
+    constructor(serverInfo: IServerInfo) {
+        Worker.serverInfo = serverInfo
     }
 
+    /** Подключение к серверу */
     private async connectToServer(): Promise<any> {
         const client: any = new ImapClient.default(
             Worker.serverInfo.imap.host,
@@ -37,55 +39,64 @@ export class Worker {
             { auth: Worker.serverInfo.imap.auth }
         );
         client.logLevel = client.LOG_LEVEL_NONE;
-        client.onerror = (inError: Error) => {
-            console.log(`IMAP.Worker.listMailboxes(): Connection error`, inError);
+        client.onerror = (error: Error) => {
+            console.log(`IMAP.Worker.listMailboxes(): Connection error`, error);
         }
         await client.connect();
         return client;
     }
 
+    /** Получить почтовых ящиков */
     public async listMailboxes(): Promise<IMailbox[]> {
         const client: any = await this.connectToServer();
         const mailboxes: any = await client.listMailboxes();
         await client.close;
         const finalMailboxes: IMailbox[] = [];
         const iterateChildren: Function = (inArray: any[]): void => {
-            inArray.forEach((inValue: any) => {
+            inArray.forEach((value: any) => {
                 finalMailboxes.push({
-                    name: inValue.name, 
-                    path: inValue.path
+                    name: value.name, 
+                    path: value.path
                 });
-                iterateChildren(inValue.children);
+                iterateChildren(value.children);
             })
         }
         iterateChildren(mailboxes.children)
         return finalMailboxes;
     }
 
-    public async listMessages(inCallOptions: ICallOptions): Promise<IMessage[]> {
+    /**
+     * Функция отдает список сообщений
+     * @param callOptions содержит название ящика и ID письма (здесь не используется).
+     */
+    public async listMessages(callOptions: ICallOptions): Promise<IMessage[]> {
         const client: any = await this.connectToServer();
-        const mailbox: any = await client.selectMailbox(inCallOptions.mailbox);
+        const mailbox: any = await client.selectMailbox(callOptions.mailbox);
         if (mailbox.exists === 0) {
             await client.close();
             return [];
         }
-        const messages: any[] = await client.listMessages(inCallOptions.mailbox, "1:*", ["uid", "envelope"])
+        const messages: any[] = await client.listMessages(callOptions.mailbox, "1:*", ["uid", "envelope"])
         await client.close();
         const finalMessages: IMessage[] = [];
-        messages.forEach((inValue: any) => {
+        messages.forEach((value: any) => {
             finalMessages.push({
-                id: inValue.uid, 
-                date: inValue.envelope.date,
-                from: inValue.envelope.from[0].adress,
-                subject: inValue.envelope.subject
+                id: value.uid, 
+                date: value.envelope.date,
+                from: value.envelope.from[0].adress,
+                subject: value.envelope.subject
             })
         })
         return finalMessages;
     }
 
-    public async getMessageBody(inCallOptions: ICallOptions): Promise<string> {
+    /**
+     * Функция отдает тело письма
+     * @param callOptions содержит название ящика и ID письма
+     */
+    public async getMessageBody(callOptions: ICallOptions): Promise<string> {
         const client: any = await this.connectToServer();
-        const messages: any[] = await client.listMessages(inCallOptions.mailbox, inCallOptions.id, ["body[]"], {byUid: true})
+        const messages: any[] = await client.listMessages(callOptions.mailbox, callOptions.id, ["body[]"], {byUid: true})
         const parsed: ParsedMail = await simpleParser(messages[0]["body[]"])
         await client.close();
         if (parsed.text)
@@ -94,10 +105,14 @@ export class Worker {
             return `Error: message body is undefined`;
     }
 
-    public async deleteMessage(inCallOptions: ICallOptions): Promise<any> {
+    /**
+     * Функция удаляет письмо по ID
+     * @param callOptions содержит название ящика и ID письма
+     */
+    public async deleteMessage(callOptions: ICallOptions): Promise<any> {
         const client: any = await this.connectToServer();
         await client.deleteMessages(
-            inCallOptions.mailbox, inCallOptions.id, {byUid: true}
+            callOptions.mailbox, callOptions.id, {byUid: true}
         );
         await client.close();
     }

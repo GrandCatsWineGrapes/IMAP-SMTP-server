@@ -9,6 +9,7 @@ export interface IContact {
 }
 
 export class Worker {
+    /** Пародия на ДБ */
     private db: Nedb;
     constructor() {
         this.db = new Datastore({
@@ -16,43 +17,62 @@ export class Worker {
             autoload: true
         })
     }
+    /**
+     * Функция отдает список контактов
+     */
     public listContacts(): Promise<IContact[]> {
-        return new Promise((inResolve, inReject) => {
-            this.db.find({}, (inError: Error, inDocs: IContact[]) => {
-                if (inError)
-                    inReject(inError);
+        return new Promise((resolve, reject) => {
+            this.db.find({}, (error: Error, inDocs: IContact[]) => {
+                if (error)
+                    reject(error);
                 else
-                    inResolve(inDocs);
+                    resolve(inDocs);
             })
         })
     }
-    public addContact(inContact: IContact): Promise<IContact> {
-        return new Promise((inResolve, inReject) => {
-            this.db.insert(inContact, (inError: Error | null, inNewDoc: IContact) => {
-                if (inError) 
-                    inReject(inError)
+
+    /**
+     * Функция добавляет контакт
+     * @param contact контакт
+     */
+    public addContact(contact: IContact): Promise<IContact> {
+        return new Promise((resolve, reject) => {
+            this.db.insert(contact, (error: Error | null, newDoc: IContact) => {
+                if (error) 
+                    reject(error)
                 else
-                    inResolve(inNewDoc)
+                    resolve(newDoc)
             })
         })
     }
-    public deleteContact(inID: string): Promise<string> {
-        return new Promise((inResolve, inReject) => {
-            this.db.remove({_id: inID}, { }, (inError: Error | null, inNumRemoved: number) => {
-                if (inError)
-                    inReject(inError)
+
+    /**
+     * Функция удаляет контакт по id
+     * @param id id контакта
+     */
+    public deleteContact(id: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.db.remove({_id: id}, { }, (error: Error | null, inNumRemoved: number) => {
+                if (error)
+                    reject(error)
                 else
-                    inResolve()
+                    resolve(id)
             })
         })
     }
-    public updateContact(inID: string, inContact: IContact): Promise<string> {
-        return new Promise((inResolve, inReject) => {
-            this.db.update({_id: inID}, { $set: inContact}, { } , (err: Error | null) => {
+
+    /**
+     * Функция обновляет контакт по id
+     * @param id id обновляемого контакта
+     * @param contact контакт
+     */
+    public updateContact(id: string, contact: IContact): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.db.update({_id: id}, { $set: contact}, { } , (err: Error | null) => {
                 if (err)
-                    inReject(err)
+                    reject(err)
                 else
-                    inResolve()
+                    resolve(id)
             })
         })
     }
