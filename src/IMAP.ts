@@ -27,6 +27,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 export class Worker {
     /** Информация о сервере */
     private static serverInfo: IServerInfo;
+    
     constructor(serverInfo: IServerInfo) {
         Worker.serverInfo = serverInfo
     }

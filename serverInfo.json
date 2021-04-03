@@ -3,16 +3,16 @@
         "host": "smtp.gmail.com",
         "port": 465,
         "auth": {
-            "user": "joshua.k.fear@gmail.com",
-            "pass": "Horse_like_kfear"
+            "user": "",
+            "pass": ""
         }
     },
     "imap": {
         "host": "imap.gmail.com",
         "port": 993,
         "auth": {
-            "user": "joshua.k.fear@gmail.com",
-            "pass": "Horse_like_kfear"
+            "user": "",
+            "pass": ""
         }
     }
 }

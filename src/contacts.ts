@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { rejects } from 'assert';
 const Datastore = require('nedb');
 
 export interface IContact {
@@ -9,7 +8,7 @@ export interface IContact {
 }
 
 export class Worker {
-    /** Пародия на ДБ */
+    /** Пародия на БД */
     private db: Nedb;
     constructor() {
         this.db = new Datastore({
